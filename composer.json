@@ -23,7 +23,8 @@
         "spatie/laravel-package-tools": "^1.9.2",
         "illuminate/contracts": "^9.0",
         "illuminate/support": "^9.0",
-        "ryangjchandler/filament-tools": "^0.4.1"
+        "ryangjchandler/filament-tools": "^0.4.1",
+        "phpdocumentor/reflection-docblock": "^5.3"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
