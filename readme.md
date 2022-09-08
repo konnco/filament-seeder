@@ -16,7 +16,7 @@ composer require konnco/filament-seeder --dev
 Optionally, you can publish the views using
 
 ```bash
-php artisan vendor:publish --tag="filament-seeder"
+php artisan vendor:publish --tag="filament-seeder-config"
 ```
 
 ## Usage
