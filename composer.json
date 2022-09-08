@@ -1,6 +1,6 @@
 {
     "name": "konnco/filament-seeder",
-    "description": "Adds a simple read-only Highlight.js pseudo-field to FilamentPHP",
+    "description": "Run the factory seeder from your dashboard",
     "keywords": [
         "seeder",
         "laravel",

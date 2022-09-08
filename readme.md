@@ -1,4 +1,4 @@
-# Add a general-purpose tools page to your Filament project.
+# Filament Seeder - Run the factory seeder from your dashboard
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/konnco/filament-seeder.svg?style=flat-square)](https://packagist.org/packages/konnco/filament-seeder)
 [![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/konnco/filament-seeder/run-tests?label=tests)](https://github.com/konnco/filament-seeder/actions?query=workflow%3Arun-tests+branch%3Amain)
