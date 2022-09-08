@@ -1,0 +1,37 @@
+{
+    "name": "konnco/filament-seeder",
+    "description": "Adds a simple read-only Highlight.js pseudo-field to FilamentPHP",
+    "keywords": [
+        "seeder",
+        "laravel",
+        "filament-seeder"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Konnco\\FilamentSeeder\\": "src/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Franky So",
+            "email": "frankyso.mail@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "spatie/laravel-package-tools": "^1.9.2",
+        "illuminate/contracts": "^9.0",
+        "illuminate/support": "^9.0",
+        "ryangjchandler/filament-tools": "^0.4.1"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Konnco\\FilamentSeeder\\FilamentSeederServiceProvider"
+            ]
+        }
+    }
+}
