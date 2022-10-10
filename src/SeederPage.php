@@ -70,7 +70,7 @@ class SeederPage extends Page implements Forms\Contracts\HasForms
         return $models->pluck('label', 'value')->toArray();
     }
 
-    private function getModelRelations($model, $type = "has")
+    private function getModelRelations($model, $type = "has", $returnType = 1)
     {
         $hasMap = [
             HasMany::class,
@@ -96,7 +96,7 @@ class SeederPage extends Page implements Forms\Contracts\HasForms
             }
 
             return in_array($returnTypeName, $forMap);
-        })->mapWithKeys(function (\ReflectionMethod $method) {
+        })->mapWithKeys(function (\ReflectionMethod $method) use ($returnType) {
             $source = file($method->getFileName());
             $start_line = $method->getStartLine() - 1; // it's actually - 1, otherwise you wont get the function() block
             $end_line = $method->getEndLine();
@@ -114,6 +114,10 @@ class SeederPage extends Page implements Forms\Contracts\HasForms
             $modelName = Str::of($match[1])->before('::class')->toString();
 
             $model = "App\\Models\\" . $modelName;
+
+            if ($returnType == 2) {
+                return [$model => $modelName];
+            }
 
             return [$method->getName() => $modelName];
         });
@@ -196,8 +200,6 @@ class SeederPage extends Page implements Forms\Contracts\HasForms
                 return Forms\Components\Checkbox::make('states.' . $method->getName())
                     ->label(str($method->getName())->headline());
             })->toArray();
-
-        return [];
     }
 
     protected function getFormSchema(): array
@@ -210,7 +212,9 @@ class SeederPage extends Page implements Forms\Contracts\HasForms
                         ->numeric()
                         ->label(__('filament-seeder::seed.make')),
                     Forms\Components\Select::make('model')
-                        ->options($this->getModelHasFactories())
+                        ->options(FilamentSeeder::models()
+                            ->pluck('label', 'value')
+                            ->toArray())
                         ->label(__('filament-seeder::seed.source'))
                         ->required()
                         ->columnSpan(5)
@@ -242,7 +246,7 @@ class SeederPage extends Page implements Forms\Contracts\HasForms
                     Forms\Components\Select::make('related_model')
                         ->label(__('filament-seeder::seed.related_model'))
                         ->options(function (\Closure $get) {
-                            return $this->getModelRelations(($get('data.model', true)), $get('type'));
+                            return $this->getModelRelations(($get('data.model', true)), $get('type'), $get('type') == 'has' ? 1 : 2);
                         }),
                     Forms\Components\Select::make('for')
                         ->label(__('filament-seeder::seed.for'))
