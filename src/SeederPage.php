@@ -2,6 +2,7 @@
 
 namespace Konnco\FilamentSeeder;
 
+use App\Models\Artist;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\Actions\Action;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
+use Spatie\ModelInfo\ModelInfo;
+use Spatie\ModelInfo\Relations\Relation;
 use Storage;
 use Str;
 
@@ -31,45 +34,6 @@ class SeederPage extends Page implements Forms\Contracts\HasForms
         'count' => 1
     ];
 
-    public function scanModelHasFactories(): Collection
-    {
-        config(['filesystems.disks.filament-seeder' => [
-            'driver' => 'local',
-            'root' => app_path('Models'),
-        ]]);
-
-        $scannedModels = collect(Storage::disk('filament-seeder')->allFiles())
-            ->map(fn($item) => Str::of($item)->replace(".php", '')->start("App\\Models\\"))
-            ->filter(fn($model) => is_subclass_of((string)$model, Model::class))
-            ->filter(fn($model) => method_exists((string)$model, 'factory'));
-
-        $excludedConfigModels = collect(config('filament-seeder.excludes', []));
-
-        $finalModels = collect(array_merge(
-            array_diff($scannedModels->toArray(), $excludedConfigModels->toArray()),
-            array_diff($excludedConfigModels->toArray(), $scannedModels->toArray()),
-        ));
-
-        return $finalModels
-            ->map(function ($item) {
-                $name = Str::of($item)->explode("\\")->last();
-                $name = Str::of($name)->headline()->plural();
-                return [
-                    'label' => config('filament-seeder.nicknames.' . $item, $name),
-                    'value' => $item
-                ];
-            })->sort();
-    }
-
-    /**
-     * Return all model that has factories
-     */
-    public function getModelHasFactories(): array
-    {
-        $models = $this->scanModelHasFactories();
-        return $models->pluck('label', 'value')->toArray();
-    }
-
     private function getModelRelations($model, $type = "has", $returnType = 1)
     {
         $hasMap = [
@@ -81,11 +45,10 @@ class SeederPage extends Page implements Forms\Contracts\HasForms
             BelongsTo::class
         ];
 
-        $allMethods = collect((new \ReflectionClass(new $model))->getMethods());
+        $relations = ModelInfo::forModel($model)->relations;
 
-        return $allMethods->filter(function (\ReflectionMethod $method) use ($model, $hasMap, $forMap, $type) {
-            $methodName = $method->getName();
-            $returnTypeName = (new \ReflectionClass(new $model))->getMethod($methodName)->getReturnType()?->getName();
+        return $relations->filter(function (Relation $relation) use ($model, $hasMap, $forMap, $type) {
+            $returnTypeName = $relation->type;
 
             if ($returnTypeName == null) {
                 return false;
@@ -96,34 +59,16 @@ class SeederPage extends Page implements Forms\Contracts\HasForms
             }
 
             return in_array($returnTypeName, $forMap);
-        })->mapWithKeys(function (\ReflectionMethod $method) use ($returnType) {
-            $source = file($method->getFileName());
-            $start_line = $method->getStartLine() - 1; // it's actually - 1, otherwise you wont get the function() block
-            $end_line = $method->getEndLine();
-            $length = $end_line - $start_line;
-
-            $body = Str::of(implode("", array_slice($source, $start_line, $length)));
-            $body = preg_split('/\r\n|\r|\n/', $body->toString());
-            $return = collect($body)->filter(fn($line) => Str::contains($line, "return"))->first();
-
-            if ($return == null) {
-                return [];
-            }
-
-            preg_match('#\((.*?)\)#', $return, $match);
-            $modelName = Str::of($match[1])->before('::class')->toString();
-
-            $model = "App\\Models\\" . $modelName;
+        })->mapWithKeys(function (Relation $relation) use ($returnType) {
+            $model = $relation->related;
 
             if ($returnType == 2) {
-                return [$model => $modelName];
+                return [$model => ModelInfo::forModel($model)->fileName];
             }
 
-            return [$method->getName() => $modelName];
+            return [$relation->name => $relation->name];
         });
     }
-
-    // need to refactor after this done
 
     protected function getActions(): array
     {

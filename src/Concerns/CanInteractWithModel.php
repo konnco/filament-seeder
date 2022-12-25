@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Spatie\ModelInfo\ModelFinder;
 
 trait CanInteractWithModel
 {
@@ -45,11 +46,7 @@ trait CanInteractWithModel
      */
     protected function factoredModels(): Collection
     {
-        $this->setupModelFilesystem();
-
-        return collect(Storage::disk('filament-seeder')->allFiles())
-            ->map(fn($item) => str($item)->remove(".php")->start("App\\Models\\"))
-            ->filter(fn($model) => is_subclass_of((string)$model, Model::class))
+        return collect(ModelFinder::all())
             ->filter(fn($model) => method_exists((string)$model, 'factory'));
     }
 
@@ -92,59 +89,4 @@ trait CanInteractWithModel
                 ];
             })->sort();
     }
-
-
-
-//    private function getModelRelations($model, $type = "has", $returnType = 1)
-//    {
-//        $hasMap = [
-//            HasMany::class,
-//            HasOne::class,
-//        ];
-//
-//        $forMap = [
-//            BelongsTo::class
-//        ];
-//
-//        $allMethods = collect((new \ReflectionClass(new $model))->getMethods());
-//
-//        return $allMethods->filter(function (\ReflectionMethod $method) use ($model, $hasMap, $forMap, $type) {
-//            $methodName = $method->getName();
-//            $returnTypeName = (new \ReflectionClass(new $model))->getMethod($methodName)->getReturnType()?->getName();
-//
-//            if ($returnTypeName == null) {
-//                return false;
-//            }
-//
-//            if ($type == "has") {
-//                return in_array($returnTypeName, $hasMap);
-//            }
-//
-//            return in_array($returnTypeName, $forMap);
-//        })->mapWithKeys(function (\ReflectionMethod $method) use ($returnType) {
-//            $source = file($method->getFileName());
-//            $start_line = $method->getStartLine() - 1; // it's actually - 1, otherwise you wont get the function() block
-//            $end_line = $method->getEndLine();
-//            $length = $end_line - $start_line;
-//
-//            $body = Str::of(implode("", array_slice($source, $start_line, $length)));
-//            $body = preg_split('/\r\n|\r|\n/', $body->toString());
-//            $return = collect($body)->filter(fn($line) => Str::contains($line, "return"))->first();
-//
-//            if ($return == null) {
-//                return [];
-//            }
-//
-//            preg_match('#\((.*?)\)#', $return, $match);
-//            $modelName = Str::of($match[1])->before('::class')->toString();
-//
-//            $model = "App\\Models\\" . $modelName;
-//
-//            if ($returnType == 2) {
-//                return [$model => $modelName];
-//            }
-//
-//            return [$method->getName() => $modelName];
-//        });
-//    }
 }
