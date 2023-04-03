@@ -83,7 +83,7 @@ class SeederPage extends Page implements Forms\Contracts\HasForms
                 ])
                 ->action(function ($data) {
                     if ($data['confirm'] == "confirm") {
-                        \Artisan::call('migrate:fresh --seed');
+                        \Artisan::call('migrate:fresh --seed --force');
                         $this->notify("success", "Database has been reset");
                         return;
                     }
