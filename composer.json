@@ -1,6 +1,5 @@
 {
     "name": "konnco/filament-seeder",
-    "version": "0.0.7",
     "description": "Run the factory seeder from your dashboard",
     "keywords": [
         "seeder",
