@@ -1,5 +1,6 @@
 {
     "name": "konnco/filament-seeder",
+    "version": "0.0.7",
     "description": "Run the factory seeder from your dashboard",
     "keywords": [
         "seeder",
@@ -21,8 +22,8 @@
     "require": {
         "php": "^8.0",
         "spatie/laravel-package-tools": "^1.9.2",
-        "illuminate/contracts": "^9.0",
-        "illuminate/support": "^9.0",
+        "illuminate/contracts": "^9.0|^10.0",
+        "illuminate/support": "^9.0|^10.0",
         "spatie/laravel-model-info": "^1.4.0",
         "phpdocumentor/reflection-docblock": "^5.3"
     },
